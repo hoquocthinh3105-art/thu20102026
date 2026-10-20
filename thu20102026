@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Happy Women's Day 20/10 🌸</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: #ffccd5; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; position: relative; }
+        
+        /* 1. Màn hình Bó hoa ban đầu (10 giây) */
+        #bouquet-screen { text-align: center; z-index: 100; transition: all 1s ease; }
+        .bouquet-emoji { font-size: 100px; animation: float 3s ease-in-out infinite; }
+        .timer-text { font-size: 18px; color: #d63384; font-weight: bold; margin-top: 15px; background: white; padding: 8px 20px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+        /* 2. Màn hình Hộp quà & Bốc thư */
+        #box-screen { display: none; text-align: center; z-index: 10; width: 90%; max-width: 430px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation: scaleUp 0.5s ease; }
+        h1 { color: #d63384; font-size: 24px; margin-bottom: 10px; font-weight: bold; }
+        .box-emoji { font-size: 80px; cursor: pointer; margin: 15px 0; transition: transform 0.2s; }
+        .box-emoji:hover { transform: scale(1.1); }
+        #btnDraw { background-color: #d63384; color: white; padding: 12px 30px; font-size: 16px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 15px; box-shadow: 0 4px 10px rgba(214, 51, 132, 0.3); }
+
+        /* 3. Giao diện Bao thư kín */
+        #envelope-screen { display: none; text-align: center; z-index: 10; animation: scaleUp 0.5s ease; }
+        .envelope { font-size: 90px; cursor: pointer; animation: pulse 2s infinite; }
+        .open-hint { color: #d63384; font-weight: bold; font-size: 18px; margin-top: 10px; background: white; padding: 5px 15px; border-radius: 20px; }
+
+        /* 4. Giao diện Lá thư mở ra trang trọng */
+        #letter-screen { display: none; background: #fffdf9; padding: 35px 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 90%; max-width: 520px; border: 2px solid #f3e5ab; z-index: 10; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; animation: slideUp 0.6s ease; position: relative; }
+        #typed-text { font-size: 18px; line-height: 1.8; color: #404040; white-space: pre-wrap; font-weight: 500; text-align: center; margin-bottom: 25px; width: 100%; }
+        
+        /* Mã QR ở góc dưới lá thư */
+        .qr-area { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: auto; border-top: 1px dashed #f3e5ab; pt: 15px; width: 100%; padding-top: 15px; }
+        .qr-area img { width: 100px; height: 100px; border: 2px solid #ffccd5; border-radius: 8px; background: white; }
+        .qr-area p { font-size: 11px; color: #888; font-weight: bold; margin-top: 5px; }
+
+        /* Hiệu ứng hoa bay lấp lánh */
+        .flower { position: absolute; top: -20px; pointer-events: none; animation: fall linear forwards; z-index: 1; }
+
+        /* Các hiệu ứng Animation */
+        @keyframes fall { to { transform: translateY(105vh) rotate(360deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    </style>
+</head>
+<body>
+
+    <!-- MÀN HÌNH 1: BÓ HOA BAN ĐẦU (10 GIÂY) -->
+    <div id="bouquet-screen">
+        <div class="bouquet-emoji">💐</div>
+        <div class="timer-text" id="timer">Đang chuẩn bị quà... 10s</div>
+    </div>
+
+    <!-- MÀN HÌNH 2: CHIẾC HỘP ĐỰNG LÁ THƯ ĐỂ BỐC NGẪU NHIÊN -->
+    <div id="box-screen">
+        <h1>🎁 Hộp Quà Bí Mật 20/10 🎁</h1>
+        <p style="font-size: 14px; color: #666; margin-top: 5px;">Hộp chứa rất nhiều lá thư chúc mừng ngẫu nhiên!</p>
+        <div class="box-emoji">🎁</div>
+        <button id="btnDraw">Bốc Thư Ngẫu Nhiên 🎲</button>
+    </div>
+
+    <!-- MÀN HÌNH 3: BAO THƯ CHƯA MỞ -->
+    <div id="envelope-screen">
+        <div class="envelope" id="envelopeIcon">✉️</div>
+        <div class="open-hint">Click chuột vào bao thư để MỞ 💌</div>
+    </div>
+
+    <!-- MÀN HÌNH 4: LÁ THƯ ĐÃ MỞ (CHẠY CHỮ + MÃ QR DƯỚI GÓC) -->
+    <div id="letter-screen">
+        <div id="typed-text"></div>
+        
+        <!-- Khu vực mã QR cố định dưới góc lá thư -->
+        <div class="qr-area">
+            <img src="https://qrserver.com" alt="Mã QR Gấu">
+            <p>Quét mã nhận gấu cute từ tớ nha 🐻</p>
+        </div>
+    </div>
+
+<script>
+    // Danh sách các câu chúc ngẫu nhiên phù hợp cho cả Mẹ, Cô và Bạn bè
+    const danhSachLoiChuc = [
+        "Hôm nay 20/10 Ngày Phụ Nữ Việt Nam.\n\nChúc người đang nhìn qua màn hình nhỏ luôn nở nụ cười trên môi, luôn tích cực, ngày càng xinh theo cách riêng của mình.\n\nMong các điều tốt đẹp đều đến với cậu, trân trọng và nâng niu không chỉ hôm nay mà tất cả những ngày về sau.\n\nGửi người trước màn hình nhỏ.\n\nChúc 20/10 thật nhiều niềm vui nháaa !",
+        
+        "Gửi người tuyệt vời trước màn hình nhỏ ✨\n\nNhân ngày 20/10, chúc người nhận được lá thư này luôn tràn ngập niềm vui, hạnh phúc bền lâu và luôn giữ được ngọn lửa năng lượng tích cực.\n\nMong rằng mọi sự dịu dàng, bình an và may mắn nhất trên thế giới này sẽ luôn đồng hành bên bạn mỗi ngày.\n\nChúc một ngày 20/10 thật trọn vẹn và ý nghĩa!",
+        
+        "Ting ting! Bạn nhận được một lời chúc ngọt ngào ngày 20/10 💖\n\nChúc người phụ nữ tuyệt vời luôn rạng rỡ như đóa hoa hướng dương đón nắng, mạnh mẽ và tỏa sáng theo cách riêng biệt nhất.\n\nCảm ơn vì sự xuất hiện của bạn đã làm cho thế giới này thêm phần ấm áp. Trân trọng và gửi ngàn lời chúc tốt đẹp nhất đến bạn!",
+        
+        "Happy Women's Day 🌸✨\n\nChúc cho người đang xem thư có một ngày 20/10 ngập tràn quà, hoa và những tiếng cười. Mong cuộc sống của bạn luôn ngập tràn những 'vibe' tích cực và bớt muộn phiền.\n\nBạn xứng đáng được trân trọng, nâng niu và yêu thương không chỉ riêng hôm nay mà là suốt 365 ngày trong năm nhaaa!"
+    ];
+
+    const bouquetScreen = document.getElementById('bouquet-screen');
+    const boxScreen = document.getElementById('box-screen');
+    const envelopeScreen = document.getElementById('envelope-screen');
+    const letterScreen = document.getElementById('letter-screen');
+    const timerText = document.getElementById('timer');
+    const btnDraw = document.getElementById('btnDraw');
+    const envelopeIcon = document.getElementById('envelopeIcon');
+    const typedTextDiv = document.getElementById('typed-text');
+
+    let selectedText = "";
+
+    // 1. Bộ đếm ngược 10 giây xem Bó hoa
+    let count = 10;
+    const countdown = setInterval(() => {
+        count--;
+        timerText.innerHTML = `Đang chuẩn bị quà... ${count}s`;
+        if (count <= 0) {
+            clearInterval(countdown);
+            bouquetScreen.style.display = 'none'; // Ẩn bó hoa
+            boxScreen.style.display = 'block';   // Hiện hộp quà bốc thư
+        }
+    }, 1000);
+
+    // 2. Click nút bốc ngẫu nhiên lá thư từ trong Hộp đựng
+    btnDraw.addEventListener('click', () => {
+        // Máy tiến hành chọn ngẫu nhiên 1 câu chúc trong mảng
+        const randomIndex = Math.floor(Math.random() * danhSachLoiChuc.length);
+        selectedText = danhSachLoiChuc[randomIndex];
+
+        boxScreen.style.display = 'none';       // Ẩn hộp quà
+        envelopeScreen.style.display = 'block'; // Hiện bao thư đóng kín có chữ Mở
+    });
+
+    // 3. Click vào Bao thư để tiến hành MỞ và CHẠY CHỮ
+    envelopeIcon.addEventListener('click', () => {
+        envelopeScreen.style.display = 'none'; // Ẩn bao thư
+        letterScreen.style.display = 'flex';   // Hiện lá thư mở trang trọng
+        document.body.style.backgroundColor = '#fff0f3';
+
+        // Hiệu ứng gõ chữ từng ký tự chạy mượt mà
+        let i = 0;
+        function typeWriter() {
+            if (i < selectedText.length) {
+                typedTextDiv.innerHTML += selectedText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 45); // Tốc độ chạy chữ
+            }
+        }
+        typeWriter();
+
+        // Tạo mưa hoa bay lấp lánh rực rỡ
+        setInterval(createFlower, 150);
+    });
+
+    // Hệ thống tạo hoa rơi ngẫu nhiên
+    function createFlower() {
+        const symbols = ['🌸', '✨', '💖', '⭐', '💮'];
+        const flower = document.createElement('div');
+        flower.classList.add('flower');
+        flower.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+        flower.style.left = Math.random() * 100 + 'vw';
+        flower.style.animationDuration = Math.random() * 3 + 2 + 's';
+        flower.style.fontSize = Math.random() * 15 + 12 + 'px';
+        document.body.appendChild(flower);
+        setTimeout(() => { flower.remove(); }, 5000);
+    }
+</script>
+</body>
+</html>
